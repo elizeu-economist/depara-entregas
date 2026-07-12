@@ -1175,11 +1175,20 @@ if r:
         with tab1:
             st.dataframe(r['stats_final'], use_container_width=True, hide_index=True)
         with tab2:
-            st.dataframe(r['painel_match'], use_container_width=True, hide_index=True) if not r['painel_match'].empty else st.info("Nenhuma divergência.")
+            if not r['painel_match'].empty:
+                st.dataframe(r['painel_match'], use_container_width=True, hide_index=True)
+            else:
+                st.info("Nenhuma divergência.")
         with tab3:
-            st.dataframe(r['somente_no_db'], use_container_width=True, hide_index=True) if not r['somente_no_db'].empty else st.info("Nenhum pedido exclusivo no DB.")
+            if not r['somente_no_db'].empty:
+                st.dataframe(r['somente_no_db'], use_container_width=True, hide_index=True)
+            else:
+                st.info("Nenhum pedido exclusivo no DB.")
         with tab4:
-            st.dataframe(r['somente_no_imr'], use_container_width=True, hide_index=True) if not r['somente_no_imr'].empty else st.info("Nenhum pedido exclusivo no IMR.")
+            if not r['somente_no_imr'].empty:
+                st.dataframe(r['somente_no_imr'], use_container_width=True, hide_index=True)
+            else:
+                st.info("Nenhum pedido exclusivo no IMR.")
     else:
         tab1, tab2, tab3, tab4, tab5 = st.tabs([
             "📊 Estatísticas",
@@ -1191,13 +1200,25 @@ if r:
         with tab1:
             st.dataframe(r['stats_final'], use_container_width=True, hide_index=True)
         with tab2:
-            st.dataframe(r['painel_match'], use_container_width=True, hide_index=True) if not r['painel_match'].empty else st.info("Nenhuma divergência.")
+            if not r['painel_match'].empty:
+                st.dataframe(r['painel_match'], use_container_width=True, hide_index=True)
+            else:
+                st.info("Nenhuma divergência.")
         with tab3:
-            st.dataframe(r['detalhe_divergencias'], use_container_width=True, hide_index=True) if not r['detalhe_divergencias'].empty else st.info("Nenhuma divergência detalhada.")
+            if not r['detalhe_divergencias'].empty:
+                st.dataframe(r['detalhe_divergencias'], use_container_width=True, hide_index=True)
+            else:
+                st.info("Nenhuma divergência detalhada.")
         with tab4:
-            st.dataframe(r['somente_no_db'], use_container_width=True, hide_index=True) if not r['somente_no_db'].empty else st.info("Nenhum item exclusivo no DB.")
+            if not r['somente_no_db'].empty:
+                st.dataframe(r['somente_no_db'], use_container_width=True, hide_index=True)
+            else:
+                st.info("Nenhum item exclusivo no DB.")
         with tab5:
-            st.dataframe(r['somente_no_imr'], use_container_width=True, hide_index=True) if not r['somente_no_imr'].empty else st.info("Nenhum item exclusivo no IMR.")
+            if not r['somente_no_imr'].empty:
+                st.dataframe(r['somente_no_imr'], use_container_width=True, hide_index=True)
+            else:
+                st.info("Nenhum item exclusivo no IMR.")
 
     if r['mapa_colunas_imr']:
         with st.expander("🔍 Colunas identificadas automaticamente (Fuzzy Match)"):
