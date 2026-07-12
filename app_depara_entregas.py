@@ -496,6 +496,15 @@ def processar_quebra(df_base, df_ref):
         painel_match = painel_match[mascara_divergencias]
         ordem_desejada = join_keys + [c for c in df_base.columns if c in painel_match.columns and c not in join_keys]
         painel_match = painel_match[[c for c in ordem_desejada if c in painel_match.columns]]
+
+        # Normaliza tipos para evitar erro de conversão (Arrow) na exibição do Streamlit:
+        # colunas-chave viram texto puro, colunas de divergência viram booleano puro.
+        painel_match.columns.name = None
+        for c in painel_match.columns:
+            if c in join_keys:
+                painel_match[c] = painel_match[c].astype(str)
+            else:
+                painel_match[c] = painel_match[c].astype(bool)
     else:
         painel_match = pd.DataFrame()
         detalhe_divergencias = pd.DataFrame()
@@ -532,6 +541,23 @@ def processar_quebra(df_base, df_ref):
     somente_no_imr       = ordenar_por_chaves(somente_no_imr, join_keys)
     df_base_out          = ordenar_por_chaves(df_base_out, join_keys)
     df_ref_out           = ordenar_por_chaves(df_ref_out, join_keys)
+
+    # Normaliza tipos de colunas numéricas/booleanas para evitar erro de conversão
+    # (Arrow) na exibição do Streamlit.
+    if not detalhe_divergencias.empty:
+        for c in join_keys:
+            if c in detalhe_divergencias.columns:
+                detalhe_divergencias[c] = detalhe_divergencias[c].astype(str)
+        for c in ['valor_imr', 'valor_db', 'diff']:
+            if c in detalhe_divergencias.columns:
+                detalhe_divergencias[c] = pd.to_numeric(detalhe_divergencias[c], errors='coerce')
+        if 'match_final' in detalhe_divergencias.columns:
+            detalhe_divergencias['match_final'] = detalhe_divergencias['match_final'].astype(bool)
+
+    for df_aux in (somente_no_db, somente_no_imr, df_base_out, df_ref_out):
+        for c in join_keys:
+            if c in df_aux.columns:
+                df_aux[c] = df_aux[c].astype(str)
 
     total_comparacoes = len(comparacao)
     total_matches = int(comparacao['match_final'].sum()) if not comparacao.empty else 0
