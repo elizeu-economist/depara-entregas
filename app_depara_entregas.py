@@ -786,7 +786,22 @@ def gerar_word(tipo_relatorio, stats_final, painel_match, somente_no_db, somente
         doc.add_paragraph("Nenhuma divergência encontrada.")
     doc.add_page_break()
 
-    add_heading(doc, '4. Painel de Match por Pedido', level=1)
+    add_heading(doc, '4. Pedidos Somente no Databricks', level=1)
+    doc.add_paragraph('Pedidos no Databricks sem correspondência no IMR.')
+    doc.add_paragraph()
+    key = 'numero_pedido'
+    db_simples = somente_no_db[[key]].rename(columns={key: 'Nº Pedido'}) if key in somente_no_db.columns else somente_no_db[['Nº Pedido']] if 'Nº Pedido' in somente_no_db.columns else somente_no_db.iloc[:, :1]
+    add_table_word(doc, db_simples, max_rows=200)
+    doc.add_page_break()
+
+    add_heading(doc, '5. Pedidos Somente no IMR', level=1)
+    doc.add_paragraph('Pedidos no IMR sem correspondência no Databricks.')
+    doc.add_paragraph()
+    imr_simples = somente_no_imr[[key]].rename(columns={key: 'Nº Pedido'}) if key in somente_no_imr.columns else somente_no_imr[['Nº Pedido']] if 'Nº Pedido' in somente_no_imr.columns else somente_no_imr.iloc[:, :1]
+    add_table_word(doc, imr_simples, max_rows=200)
+    doc.add_page_break()
+
+    add_heading(doc, '6. Painel de Match por Pedido', level=1)
     doc.add_paragraph('Pedidos com ao menos uma divergência e quais campos estão em conformidade.')
     doc.add_paragraph()
     if painel_match.empty:
@@ -797,21 +812,6 @@ def gerar_word(tipo_relatorio, stats_final, painel_match, somente_no_db, somente
             if pm[c].dtype == bool:
                 pm[c] = pm[c].map({True: '✔', False: '✘'})
         add_table_word(doc, pm, max_rows=150)
-    doc.add_page_break()
-
-    add_heading(doc, '5. Pedidos Somente no Databricks', level=1)
-    doc.add_paragraph('Pedidos no Databricks sem correspondência no IMR.')
-    doc.add_paragraph()
-    key = 'numero_pedido'
-    db_simples = somente_no_db[[key]].rename(columns={key: 'Nº Pedido'}) if key in somente_no_db.columns else somente_no_db[['Nº Pedido']] if 'Nº Pedido' in somente_no_db.columns else somente_no_db.iloc[:, :1]
-    add_table_word(doc, db_simples, max_rows=200)
-    doc.add_page_break()
-
-    add_heading(doc, '6. Pedidos Somente no IMR', level=1)
-    doc.add_paragraph('Pedidos no IMR sem correspondência no Databricks.')
-    doc.add_paragraph()
-    imr_simples = somente_no_imr[[key]].rename(columns={key: 'Nº Pedido'}) if key in somente_no_imr.columns else somente_no_imr[['Nº Pedido']] if 'Nº Pedido' in somente_no_imr.columns else somente_no_imr.iloc[:, :1]
-    add_table_word(doc, imr_simples, max_rows=200)
 
     output = io.BytesIO()
     doc.save(output)
@@ -925,20 +925,7 @@ def gerar_word_quebra(stats_final, painel_match, detalhe_divergencias,
         add_table_word(doc, det, max_rows=150)
     doc.add_page_break()
 
-    add_heading(doc, '4. Painel de Match por Item', level=1)
-    doc.add_paragraph('Itens com ao menos uma divergência e quais campos estão em conformidade.')
-    doc.add_paragraph()
-    if painel_match.empty:
-        doc.add_paragraph("Nenhum item com divergência.")
-    else:
-        pm = painel_match.copy()
-        for c in pm.columns:
-            if pm[c].dtype == bool:
-                pm[c] = pm[c].map({True: '✔', False: '✘'})
-        add_table_word(doc, pm, max_rows=150)
-    doc.add_page_break()
-
-    add_heading(doc, '5. Itens Somente no Databricks', level=1)
+    add_heading(doc, '4. Itens Somente no Databricks', level=1)
     doc.add_paragraph('Itens (Produto + Lote) no Databricks sem correspondência no IMR.')
     doc.add_paragraph()
     keys_quebra = ['numero_produto', 'codigo_lote']
@@ -949,7 +936,7 @@ def gerar_word_quebra(stats_final, painel_match, detalhe_divergencias,
     add_table_word(doc, db_simples, max_rows=200)
     doc.add_page_break()
 
-    add_heading(doc, '6. Itens Somente no IMR', level=1)
+    add_heading(doc, '5. Itens Somente no IMR', level=1)
     doc.add_paragraph('Itens (Produto + Lote) no IMR sem correspondência no Databricks.')
     doc.add_paragraph()
     imr_cols = [k for k in keys_quebra if k in somente_no_imr.columns]
@@ -957,6 +944,19 @@ def gerar_word_quebra(stats_final, painel_match, detalhe_divergencias,
         columns={'numero_produto': 'Nº Produto', 'codigo_lote': 'Lote'}
     ) if imr_cols else somente_no_imr.iloc[:, :2]
     add_table_word(doc, imr_simples, max_rows=200)
+    doc.add_page_break()
+
+    add_heading(doc, '6. Painel de Match por Item', level=1)
+    doc.add_paragraph('Itens com ao menos uma divergência e quais campos estão em conformidade.')
+    doc.add_paragraph()
+    if painel_match.empty:
+        doc.add_paragraph("Nenhum item com divergência.")
+    else:
+        pm = painel_match.copy()
+        for c in pm.columns:
+            if pm[c].dtype == bool:
+                pm[c] = pm[c].map({True: '✔', False: '✘'})
+        add_table_word(doc, pm, max_rows=150)
 
     output = io.BytesIO()
     doc.save(output)
