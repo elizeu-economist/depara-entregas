@@ -7,6 +7,7 @@ import re
 import datetime
 import io
 import os
+from zoneinfo import ZoneInfo
 
 from dotenv import load_dotenv
 from databricks import sql as databricks_sql
@@ -78,6 +79,13 @@ st.markdown("Selecione o tipo de relatório, o período, faça o upload do IMR e
 # =======================================================
 NOMES_MESES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
                "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]
+
+FUSO_BRASIL = ZoneInfo("America/Sao_Paulo")
+
+
+def agora_brasil():
+    """Data/hora atual no fuso de Brasília (o servidor do Streamlit Cloud usa UTC)."""
+    return datetime.datetime.now(FUSO_BRASIL)
 
 COR_HEADER_AZUL = (0, 32, 96)
 COR_DIVERGENCIA = (255, 199, 206)
@@ -703,7 +711,7 @@ def gerar_word(tipo_relatorio, stats_final, painel_match, somente_no_db, somente
     doc.styles['Normal'].font.name = 'Arial'
     doc.styles['Normal'].font.size = Pt(10)
 
-    hoje_str = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
+    hoje_str = agora_brasil().strftime("%d/%m/%Y %H:%M")
 
     titulo = doc.add_heading('Relatório de Cruzamento De-Para', 0)
     titulo.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -835,7 +843,7 @@ def gerar_word_quebra(stats_final, painel_match, detalhe_divergencias,
     doc.styles['Normal'].font.name = 'Arial'
     doc.styles['Normal'].font.size = Pt(10)
 
-    hoje_str = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
+    hoje_str = agora_brasil().strftime("%d/%m/%Y %H:%M")
 
     titulo = doc.add_heading('Relatório de Cruzamento De-Para', 0)
     titulo.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -1227,7 +1235,7 @@ if r:
 
     st.divider()
     st.subheader("📥 Downloads")
-    hoje = datetime.datetime.now().strftime("%Y-%m-%d")
+    hoje = agora_brasil().strftime("%Y-%m-%d")
     prefixo = CONFIG[r['tipo']]['prefixo_saida']
     nome_base = f"({hoje}) {prefixo}_{r['ano_input']}_{r['mes_input']:02d}"
 
