@@ -93,25 +93,6 @@ COR_OK          = (198, 239, 206)
 COR_AVISO       = (255, 235, 156)
 COR_CINZA_CLARO = (242, 242, 242)
 
-# Dicionário de conversão Ano/Mês -> imr_referencia (usado apenas em Comprovantes).
-# Quando surgir um novo mês, basta adicionar a linha aqui.
-DICIONARIO_IMR_COMPROVANTES = {
-    "2025-01": "7",
-    "2025-02": "8",
-    "2025-03": "18",
-    "2025-04": "21",
-    "2025-05": "24",
-    "2025-06": "25",
-    "2025-07": "26",
-    "2025-08": "30",
-    "2025-09": "31",
-    "2025-10": "32",
-    "2025-11": "33",
-    "2025-12": "34",
-    "2026-01": "36",
-    "2026-02": "37",
-}
-
 # =======================================================
 # ==== Configuração por tipo de relatório ====
 # =======================================================
@@ -296,7 +277,7 @@ def montar_query(tipo, ano, mes):
     if tipo == "Entregas":
         return f"""
             SELECT *
-            FROM vtclog.gold.cte_imr
+            FROM vtclog.gold.cte_imr_previa
             WHERE ano_imr_referencia = {ano}
               AND mes_imr_referencia = {mes}
         """
@@ -307,12 +288,11 @@ def montar_query(tipo, ano, mes):
             WHERE ano = {ano} AND mes = {mes}
         """
     if tipo == "Comprovantes":
-        chave = f"{ano}-{mes:02d}"
-        imr_ref = DICIONARIO_IMR_COMPROVANTES[chave]
         return f"""
             SELECT *
-            FROM vtclog.gold.comprovantes_imr
-            WHERE imr_referencia = '{imr_ref}'
+            FROM vtclog.gold.comprovantes_imr_previa
+            WHERE ano_imr_referencia = {ano}
+              AND mes_imr_referencia = {mes}
         """
     if tipo == "Armazém - Quebra Depósito":
         return f"""
@@ -1003,22 +983,8 @@ with col2:
     )
 
 nome_mes = NOMES_MESES[mes_input - 1]
-
-# Validação específica do Comprovantes (dicionário de referências IMR)
 periodo_valido = True
-if tipo_relatorio == "Comprovantes":
-    chave_busca = f"{ano_input}-{mes_input:02d}"
-    if chave_busca in DICIONARIO_IMR_COMPROVANTES:
-        imr_ref = DICIONARIO_IMR_COMPROVANTES[chave_busca]
-        st.success(f"Período selecionado: **{nome_mes} de {ano_input}** (Referência IMR: {imr_ref})")
-    else:
-        periodo_valido = False
-        st.error(
-            f"O período {nome_mes} de {ano_input} ainda não está cadastrado no dicionário de "
-            f"referências IMR de Comprovantes. Fale com o responsável para atualizar o app."
-        )
-else:
-    st.success(f"Período selecionado: **{nome_mes} de {ano_input}**")
+st.success(f"Período selecionado: **{nome_mes} de {ano_input}**")
 
 st.divider()
 st.subheader("3. Upload do arquivo IMR")
